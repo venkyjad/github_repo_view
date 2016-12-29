@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html class="fixed " ng-app="MyApp">
+	<head>
+		<!-- Basic -->
+		<meta charset="UTF-8">
+		<title> Github</title>
+
+
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<style>
+		.git{
+			border-radius: 30px;
+			background-color: #333232;
+		}
+		html,body{
+			background-color: #131313;
+		}
+		.name{
+			color:#f0ad4e;
+		}
+		.info{
+			color:#ffffff;
+		}
+		ul.list {
+		  width: 300px;
+		}
+
+		ul.list li{
+		  display:inline-block;
+		  width: 100px;
+		}
+		</style>
+		<script src="static/js/sweetalert.min.js"></script><!-- SweetAlert borrowed from github for custom alerts -->
+		<link rel="stylesheet" type="text/css" href="static/css/sweetalert.css">
+
+	</head>
+	<body ng-controller="AppController" ng-app="MyApp">
+<br/><br/>
+
+<div class="col-md-offset-2 col-md-8 git">
+
+			<div class="row">
+
+				<div class="col-md-12" style="margin-top:10px">
+					<center><img src= "/static/images/git.png" width=70></center>
+				</div>
+		</div>
+		<br/>
+		<div class="col-md-offset-1 col-md-10" >
+			<div class="input-group mb-md">
+														<input type="text" class="form-control" ng-model="profile" placeholder="Enter the User's Name eg. venkyjad">
+														<span class="input-group-btn">
+															<!-- username of github is given in this model -->
+															<button class="btn btn-warning" ng-click="clone_list()" type="button" ng-disabled="!profile">View Repos</button>
+														</span>
+													</div>
+
+		</div>
+		<br/><br/><br/><br/>
+</div>
+<div class="col-md-offset-4 col-md-4 repos">
+	<br/><br/><br/><br/><br/><br/>
+	<center><h1 class="text-warning">Enter the User's Name to view all Repos</h1></center>
+</div>
+<!-- loader -->
+<div class="col-md-offset-4 col-md-4 giticon" hidden>
+	<br/>
+
+	<center><img src="/static/images/octocat-spinner-smil.min.svg" width=150><br/>
+		<h1 class="text-warning">Getting Repos.. Please Wait</h1></center>
+</div>
+<!-- loader ends here-->
+
+<!-- cloning loader-->
+<div class="col-md-offset-4 col-md-4 cloneicon" hidden>
+	<br/>
+
+	<center><img src="/static/images/octocat-spinner-smil.min.svg" width=150><br/>
+		<h1 class="text-warning">Cloning Repos.. This might take some time</h1></center>
+</div>
+
+<!-- cloning loader ends here-->
+
+<div class="col-md-offset-2 col-md-8 gitlist" hidden>
+<br/><br/>
+	<center>
+ <h4 class="info"><b class="name">{a pname a}</b> has {a namea.length a} repositories&nbsp;<button class="btn btn-success btn-xs" ng-click="clone_all()">Clone All</button></h4></center><hr>
+ <div class="row">
+	 <div class="col-md-2 col-md-offset-2">
+ <img ng-src= "{a imgurl a}" width=100>
+
+ </div>
+ <!-- Shows all the repos list -->
+ <div class="col-md-8 repodetail">
+
+	 <table>
+		 <tr ng-repeat="n in namea" >
+			 <td width="200" height="50">
+				 <!-- Upon clicking the repo it'll direct u to github page of the particular repo-->
+				 <a ng-href="{a n.path a}" target="_blank">{a n.reponame a}</a>
+			 </td>
+			 <td width="200" height="50">
+				 <!-- Downloading that particular Repo-->
+				 <a class="pull-right btn btn-success btn-xs" href="{a n.download a}"> Download </a>
+			 </td>
+		 </tr>
+	 </table>
+
+ </div>
+ <!-- Repos list ends here -->
+ </div>
+
+</div>
+
+
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
+
+				<script>
+
+				var MyApp = angular.module('MyApp',[ ]);
+
+
+
+			    MyApp.config(['$interpolateProvider', function($interpolateProvider) {
+						/* Since AngularJS and Flask both uses flower braces,
+						 made changes to angularjs with letter 'a' for ease */
+			      $interpolateProvider.startSymbol('{a');
+			      $interpolateProvider.endSymbol('a}');
+			    }]);
+
+
+
+
+
+
+
+				angular.module('MyApp').controller('AppController', function ($scope,$http,$window,$sce) {
+					/* This angular Function gets the list of repos */
+					$scope.clone_list = function (){
+						$('.repos').hide();
+						$('.giticon').show();
+						$('.repodetail').hide();
+						$('.gitlist').hide();
+						$http.post("/get_repo_list",
+					{
+						username:$scope.profile
+					})
+					.then(function(response){
+						$('#treeBasic').show();
+						$('.repos').hide();
+						$('.giticon').hide();
+						$('.gitlist').show();
+						$('.repodetail').show();
+						$scope.namea = response.data.names;/*gets the name of the repos*/
+						$scope.imgurl = response.data.img;/*if the user has img then its shown*/
+						$scope.pname = $scope.profile;/* github name of the user*/
+
+
+					})
+					}
+
+					/*this function can be used to clone all repos of the user to the local system*/
+
+					$scope.clone_all = function (){
+						/* SWAL is sweetalert available on github, its an open source */
+						swal({
+  								title: "Alert",
+  								text: "Your About clone All the repos to your local system.. Are you Sure?",
+  								type: "warning",
+  								showCancelButton: true,
+  								confirmButtonColor: "#DD6B55",
+  								confirmButtonText: "Yes, Clone it!",
+  								cancelButtonText: "Cancel",
+  								closeOnConfirm: false,
+  								closeOnCancel: false
+								 },
+								 function(isConfirm){
+  							 										if (isConfirm) { /*this part of the function is executed if users clicks on confirm*/
+																			swal.close(); /*this closes the previous alert dialog box*/
+																			$('.repodetail').hide();
+																			$('.cloneicon').show();
+
+																			$('.gitlist').hide();
+																			$http.post('/clone_repos',{
+																				username:$scope.profile
+																			})
+																			.then(function(response){
+																				swal("Done!", "Cloning was Succesfull", "success")
+																				$('.cloneicon').hide();
+																				$('.repodetail').show();
+																				$('.gitlist').show();
+
+																			})
+  																									}
+																	  else
+																		 		{
+    																				swal("Cancelled", "You Cancelled Cloning", "error");
+  																			}
+								});
+
+							}
+
+				/*end of angular Script*/
+				});
+
+
+				</script>
+	</body>
+</html>
